@@ -33,7 +33,7 @@ RUN rm -rf html && \
     mkdir -p html/bl-content/ && \
     curl ${bludit_url} | tar xz -C html --strip-components 1 && \
     chown -R www-data:www-data html && \
-    sed -i -e "s/'DEBUG_MODE', FALSE/'DEBUG_MODE', TRUE/g" html/bl-kernel/boot/init.php 
+    sed -i -e "s|'DEBUG_MODE', FALSE|'DEBUG_MODE', TRUE|g" html/bl-kernel/boot/init.php 
 
 VOLUME ["/var/www/html/bl-content","/var/www/html/bl-themes","/var/www/html/bl-plugins"]
 
