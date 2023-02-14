@@ -1,11 +1,11 @@
 FROM debian:bullseye-slim
 
-LABEL version="1.1"
+LABEL version="1.2"
 LABEL maintainer="nogajun@gmail.com"
 LABEL description="Debian-based bludit image using lighttpd."
 
-ARG bludit_version="3-14-1"
-ARG bludit_url="https://www.bludit.com/releases/bludit-${bludit_version}.zip"
+ARG bludit_version="3.14.1"
+ARG bludit_url="https://github.com/bludit/bludit/archive/refs/tags/${php_version}.zip"
 ARG php_version="7.4"
 ARG php_ini="/etc/php/${php_version}/cgi/php.ini"
 
@@ -17,19 +17,15 @@ RUN apt-get -y update && \
 # lighttpd modules
 RUN lighttpd-enable-mod accesslog deflate rewrite fastcgi-php && \
     echo 'url.rewrite-if-not-file = ( "^/(.*)" => "/index.php?q=$1" )' >> /etc/lighttpd/conf-available/10-rewrite.conf && \
-    install -o www-data -g www-data -m 750 -d /run/lighttpd && \
-    gpasswd -a www-data tty
+    sed -i -e 's|/var/log/lighttpd/access.log|/tmp/logpipe|g' /etc/lighttpd/conf-available/10-accesslog.conf && \
+    install -o www-data -g www-data -m 750 -d /run/lighttpd 
 
 # Config files
-RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=1/g" ${php_ini} && \
-    sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 100M/g" ${php_ini} && \
-    sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 100M/g" ${php_ini} && \
-    sed -i -e "s/variables_order = \"GPCS\"/variables_order = \"EGPCS\"/g" ${php_ini} && \
-    sed -i -e "s/memory_limit = 128M/memory_limit = -1/g" ${php_ini}
-
-# forward request and error logs to docker log collector
-RUN ln -sf /dev/stdout /var/log/lighttpd/access.log && \
-    ln -sf /dev/stderr /var/log/lighttpd/error.log
+RUN sed -i -e 's|;cgi.fix_pathinfo=1|cgi.fix_pathinfo=1|g' ${php_ini} && \
+    sed -i -e 's|upload_max_filesize = 2M|upload_max_filesize = 100M|g' ${php_ini} && \
+    sed -i -e 's|post_max_size = 8M|post_max_size = 100M|g' ${php_ini} && \
+    sed -i -e 's|variables_order = "GPCS"|variables_order = "EGPCS"|g' ${php_ini} && \
+    sed -i -e 's|memory_limit = 128M|memory_limit = -1|g' ${php_ini}
 
 # bludit installation
 WORKDIR /var/www
@@ -41,6 +37,11 @@ RUN rm -rf html && \
     sed -i -e "s/'DEBUG_MODE', FALSE/'DEBUG_MODE', TRUE/g" html/bl-kernel/boot/init.php && \
     rm bludit.zip
 
+# Copy start up scpript
+COPY start.sh /usr/local/bin/
+
 EXPOSE 80
 
-CMD ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
+#CMD ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
+CMD ["start.sh"]
+

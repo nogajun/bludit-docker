@@ -1,0 +1,8 @@
+services:
+  bludit:
+    container_name: bludit
+    build: .
+    image: bludit
+    restart: always
+    ports:
+      - "8000:80"
