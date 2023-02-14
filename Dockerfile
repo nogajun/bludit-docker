@@ -5,13 +5,13 @@ LABEL maintainer="nogajun@gmail.com"
 LABEL description="Debian-based bludit image using lighttpd."
 
 ARG bludit_version="3.14.1"
-ARG bludit_url="https://github.com/bludit/bludit/archive/refs/tags/${php_version}.zip"
+ARG bludit_url="https://codeload.github.com/bludit/bludit/tar.gz/refs/tags/${bludit_version}"
 ARG php_version="7.4"
 ARG php_ini="/etc/php/${php_version}/cgi/php.ini"
 
 RUN apt-get -y update && \
     apt-get -y dist-upgrade && \
-    apt-get -y install lighttpd php php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml unzip curl && \
+    apt-get -y install lighttpd php php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl && \
     apt-get -y autoremove && apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # lighttpd modules
@@ -30,18 +30,17 @@ RUN sed -i -e 's|;cgi.fix_pathinfo=1|cgi.fix_pathinfo=1|g' ${php_ini} && \
 # bludit installation
 WORKDIR /var/www
 RUN rm -rf html && \
-    curl -o bludit.zip ${bludit_url} && \
-    unzip bludit.zip && \
-    mv bludit html && \
+    mkdir -p html/bl-content/ && \
+    curl ${bludit_url} | tar xz -C html --strip-components 1 && \
     chown -R www-data:www-data html && \
-    sed -i -e "s/'DEBUG_MODE', FALSE/'DEBUG_MODE', TRUE/g" html/bl-kernel/boot/init.php && \
-    rm bludit.zip
+    sed -i -e "s/'DEBUG_MODE', FALSE/'DEBUG_MODE', TRUE/g" html/bl-kernel/boot/init.php 
+
+VOLUME ["/var/www/html/bl-content","/var/www/html/bl-themes","/var/www/html/bl-plugins"]
 
 # Copy start up scpript
 COPY start.sh /usr/local/bin/
 
 EXPOSE 80
 
-#CMD ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
 CMD ["start.sh"]
 
