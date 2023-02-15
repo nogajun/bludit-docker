@@ -39,7 +39,8 @@ RUN BLUDIT_VERSION=$(curl -s https://api.github.com/repos/bludit/bludit/releases
     chown -R www-data:www-data /var/www/html
 #    sed -i -e "s|'DEBUG_MODE', FALSE|'DEBUG_MODE', TRUE|g" /var/www/html/bl-kernel/boot/init.php
 
-VOLUME ["/var/www/html/bl-content","/var/www/html/bl-themes","/var/www/html/bl-plugins"]
+# set volume
+VOLUME /var/www/html/bl-content
 
 # Copy start up scpript
 COPY start.sh /usr/local/bin/
