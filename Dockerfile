@@ -29,15 +29,15 @@ RUN sed -i -e \
      s|memory_limit = 128M|memory_limit = -1|g' /etc/php/${PHP_VERSION}/cgi/php.ini
 
 # bludit installation
-WORKDIR /var/www
+WORKDIR /var/www/html
 RUN BLUDIT_VERSION=$(curl -s https://api.github.com/repos/bludit/bludit/releases/latest | grep tag_name - | cut -d"\"" -f4) && \
-    curl https://codeload.github.com/bludit/bludit/tar.gz/refs/tags/${BLUDIT_VERSION} | tar xz -C html --strip-components 1 \
+    curl https://codeload.github.com/bludit/bludit/tar.gz/refs/tags/${BLUDIT_VERSION} | tar xz -C . --strip-components 1 \
     --exclude='*/.gitignore' \
     --exclude='*/.github' \
     --exclude='*/README.md' \
     --exclude='*/LICENSE' && \
-    chown -R www-data:www-data html
-#    sed -i -e "s|'DEBUG_MODE', FALSE|'DEBUG_MODE', TRUE|g" html/bl-kernel/boot/init.php
+    chown -R www-data:www-data /var/www/html
+#    sed -i -e "s|'DEBUG_MODE', FALSE|'DEBUG_MODE', TRUE|g" /var/www/html/bl-kernel/boot/init.php
 
 VOLUME ["/var/www/html/bl-content","/var/www/html/bl-themes","/var/www/html/bl-plugins"]
 
