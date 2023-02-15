@@ -1,8 +1,11 @@
 services:
   bludit:
+    image: nogajun/bludit
     container_name: bludit
-    build: .
-    image: bludit
     restart: always
     ports:
       - "8000:80"
+    volumes:
+      - ./bl-content:/var/www/html/bl-content
+      - ./bl-plugins:/var/www/html/bl-plugins
+      - ./bl-themes:/var/www/html/bl-themes
