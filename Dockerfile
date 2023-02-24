@@ -9,11 +9,12 @@ ARG PHP_VERSION="7.4"
 # package installtion
 RUN apt-get -y update && \
     apt-get -y dist-upgrade && \
-    apt-get -y --no-install-recommends install lighttpd php php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl && \
+    apt-get -y --no-install-recommends install lighttpd lighttpd-mod-deflate php php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl ca-certificates && \
     apt-get -y autoremove && apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # set up lighttpd modules
 COPY 95-bludit.conf /etc/lighttpd/conf-available/
+
 RUN echo 'url.rewrite-if-not-file = ( "" => "/index.php?${qsa}" )' >> /etc/lighttpd/conf-available/10-rewrite.conf && \
     sed -i -e 's|/var/log/lighttpd/access.log|/tmp/logpipe|g' /etc/lighttpd/conf-available/10-accesslog.conf && \
     lighttpd-enable-mod accesslog deflate rewrite fastcgi-php bludit && \
@@ -31,8 +32,9 @@ RUN sed -i -e \
 
 # bludit installation
 WORKDIR /var/www/html
-RUN BLUDIT_VERSION=$(curl -s https://api.github.com/repos/bludit/bludit/releases/latest | grep tag_name - | cut -d"\"" -f4) && \
-    curl https://codeload.github.com/bludit/bludit/tar.gz/refs/tags/${BLUDIT_VERSION} | tar xz -C . --strip-components 1 \
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN BLUDIT_VERSION="$(curl -s https://api.github.com/repos/bludit/bludit/releases/latest | grep tag_name - | cut -d'"' -f4)" && \
+    curl "https://codeload.github.com/bludit/bludit/tar.gz/refs/tags/${BLUDIT_VERSION}" | tar xz -C . --strip-components 1 \
     --exclude='*/.gitignore' \
     --exclude='*/.github' \
     --exclude='*/README.md' \
