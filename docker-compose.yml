@@ -6,6 +6,6 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - ./bl-content:/var/www/html/bl-content
-      - ./bl-plugins:/var/www/html/bl-plugins
-      - ./bl-themes:/var/www/html/bl-themes
+    #  - ./bl-content:/var/www/html/bl-content
+    #  - ./bl-plugins:/var/www/html/bl-plugins
+    #  - ./bl-themes:/var/www/html/bl-themes

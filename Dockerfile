@@ -1,6 +1,6 @@
 FROM debian:bullseye-slim
 
-LABEL version="1.2"
+LABEL version="1.3"
 LABEL maintainer="nogajun@gmail.com"
 LABEL description="Debian-based bludit image using lighttpd."
 
@@ -9,17 +9,18 @@ ARG PHP_VERSION="7.4"
 # package installtion
 RUN apt-get -y update && \
     apt-get -y dist-upgrade && \
-    apt-get -y install lighttpd php php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl && \
+    apt-get -y --no-install-recommends install lighttpd php php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl && \
     apt-get -y autoremove && apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # set up lighttpd modules
-RUN lighttpd-enable-mod accesslog deflate rewrite fastcgi-php && \
-    echo 'url.rewrite-if-not-file = ( "^/(.*)" => "/index.php?q=$1" )' >> /etc/lighttpd/conf-available/10-rewrite.conf && \
+COPY 95-bludit.conf /etc/lighttpd/conf-available/
+RUN echo 'url.rewrite-if-not-file = ( "" => "/index.php?${qsa}" )' >> /etc/lighttpd/conf-available/10-rewrite.conf && \
     sed -i -e 's|/var/log/lighttpd/access.log|/tmp/logpipe|g' /etc/lighttpd/conf-available/10-accesslog.conf && \
+    lighttpd-enable-mod accesslog deflate rewrite fastcgi-php bludit && \
     install -o www-data -g www-data -m 750 -d /run/lighttpd && \
     rm /var/www/html/index.lighttpd.html && \
     mkdir -p /var/www/html/bl-content/
-
+    
 # set up php.ini
 RUN sed -i -e \
     's|;cgi.fix_pathinfo=1|cgi.fix_pathinfo=1|g; \
