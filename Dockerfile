@@ -1,6 +1,6 @@
 FROM debian:bullseye-slim
 
-LABEL version="1.3"
+LABEL version="1.0"
 LABEL maintainer="nogajun@gmail.com"
 LABEL description="Debian-based bludit image using lighttpd."
 
