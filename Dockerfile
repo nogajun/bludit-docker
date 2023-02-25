@@ -9,7 +9,7 @@ ARG PHP_VERSION="7.4"
 # package installtion
 RUN apt-get -y update && \
     apt-get -y dist-upgrade && \
-    apt-get -y --no-install-recommends install lighttpd lighttpd-mod-deflate php php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl ca-certificates && \
+    apt-get -y install lighttpd php php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl && \
     apt-get -y autoremove && apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # set up lighttpd modules
@@ -39,6 +39,7 @@ RUN BLUDIT_VERSION="$(curl -s https://api.github.com/repos/bludit/bludit/release
     --exclude='*/.github' \
     --exclude='*/README.md' \
     --exclude='*/LICENSE' && \
+    mkdir -p /var/www/html/bl-content && \
     chown -R www-data:www-data /var/www/html
 #    sed -i -e "s|'DEBUG_MODE', FALSE|'DEBUG_MODE', TRUE|g" /var/www/html/bl-kernel/boot/init.php
 
