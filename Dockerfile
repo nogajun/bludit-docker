@@ -1,16 +1,16 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
-LABEL version="1.0"
+LABEL version="1.1"
 LABEL maintainer="nogajun@gmail.com"
 LABEL description="Debian-based bludit image using lighttpd."
 
-ARG PHP_VERSION="7.4"
+ARG PHP_VERSION="8.2"
 
 # package installtion
-RUN apt-get -y update && \
-    apt-get -y dist-upgrade && \
-    apt-get -y install lighttpd php php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl && \
-    apt-get -y autoremove && apt-get -y clean && rm -rf /var/lib/apt/lists/*
+RUN apt -y update && \
+    apt -y dist-upgrade && \
+    apt -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl ca-certificates php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl && \
+    apt -y autoremove && apt -y clean && rm -rf /var/lib/apt/lists/*
 
 # set up lighttpd modules
 COPY 95-bludit.conf /etc/lighttpd/conf-available/
@@ -21,7 +21,7 @@ RUN echo 'url.rewrite-if-not-file = ( "" => "/index.php?${qsa}" )' >> /etc/light
     install -o www-data -g www-data -m 750 -d /run/lighttpd && \
     rm /var/www/html/index.lighttpd.html && \
     mkdir -p /var/www/html/bl-content/
-    
+
 # set up php.ini
 RUN sed -i -e \
     's|;cgi.fix_pathinfo=1|cgi.fix_pathinfo=1|g; \
