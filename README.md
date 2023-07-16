@@ -1,15 +1,15 @@
-# Flat file CMS Bludit with Debian 11(bullseye-slim), Lighttpd, FastCGI and PHP 7.4
+# Flat file CMS Bludit with Debian 12(bookworm-slim), Lighttpd, FastCGI and PHP 8.2
 
-This docker image Dockerfile is a Debian-based(bullseye-slim) Bludit docker image created with reference to the [official docker image configuration](https://github.com/bludit/docker/blob/master/Dockerfile).
+This docker image Dockerfile is a Debian-based(bookworm-slim) Bludit docker image created with reference to the [official docker image configuration](https://github.com/bludit/docker/blob/master/Dockerfile).
 
-It uses compact [lighttpd](https://www.lighttpd.net/) as the http server and runs PHP 7.4 with FastCGI.
+It uses compact [lighttpd](https://www.lighttpd.net/) as the http server and runs PHP 8.2 with FastCGI.
 
 ## Information
 
-* `FROM debian:bullseye-slim`
-* Bludit 3.14.1
-* Lighttpd 1.4.59 with FastCGI
-* PHP 7.4
+* `FROM debian:bookworm-slim`
+* Bludit 3.15.0
+* Lighttpd 1.4.69 with FastCGI
+* PHP 8.2
 
 ## Example
 
