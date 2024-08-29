@@ -1,3 +1,8 @@
+> [!CAUTION]
+> The author is no longer using Bludit, so it is being archived. If you want to change it, please fork it.
+> 
+> 作者がBluditを使わなくなったのでアーカイブ化します。変更したい人はフォークしてください。
+
 # Flat file CMS Bludit with Debian 12(bookworm-slim), Lighttpd, FastCGI and PHP 8.2
 
 This docker image Dockerfile is a Debian-based(bookworm-slim) Bludit docker image created with reference to the [official docker image configuration](https://github.com/bludit/docker/blob/master/Dockerfile).
