@@ -1,16 +1,17 @@
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
-LABEL version="1.1"
+LABEL version="1.2"
 LABEL maintainer="nogajun@gmail.com"
 LABEL description="Debian-based bludit image using lighttpd."
 
-ARG PHP_VERSION="8.2"
+ARG PHP_VERSION="8.4"
 
 # package installtion
-RUN apt -y update && \
-    apt -y dist-upgrade && \
-    apt -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl ca-certificates php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl && \
-    apt -y autoremove && apt -y clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get -y update && \
+    apt-get -y dist-upgrade && \
+    apt-get -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl ca-certificates php-cgi php-gd php-mbstring php-zip php-json php-xml curl && \
+    apt-get -y autoremove && apt-get -y clean && rm -rf /var/lib/apt/lists/*
+# apt-get -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl ca-certificates php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl 
 
 # set up lighttpd modules
 COPY 95-bludit.conf /etc/lighttpd/conf-available/
