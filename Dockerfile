@@ -1,48 +1,49 @@
+FROM debian:trixie AS builder
+
+# bludit installation
+WORKDIR /work
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN apt-get -y update && apt-get -y install curl && \
+  BLUDIT_VERSION="$(curl -s https://api.github.com/repos/bludit/bludit/releases/latest | grep tag_name - | cut -d'"' -f4)" && \
+  curl "https://codeload.github.com/bludit/bludit/tar.gz/refs/tags/${BLUDIT_VERSION}" | tar xz -C . --strip-components 1 \
+  --exclude='*/.gitignore' --exclude='*/.github' --exclude='*/README.md' --exclude='*/LICENSE' && \
+  mkdir -p /work/bl-content && \
+  chown -R www-data:www-data /work
+#    sed -i -e "s|'DEBUG_MODE', FALSE|'DEBUG_MODE', TRUE|g" /work/bl-kernel/boot/init.php
+
 FROM debian:trixie-slim
 
-LABEL version="1.2"
+LABEL version="1.3"
 LABEL maintainer="nogajun@gmail.com"
 LABEL description="Debian-based bludit image using lighttpd."
 
 ARG PHP_VERSION="8.4"
 
+WORKDIR /var/www/html
+COPY --from=builder /work /var/www/html
+
 # package installtion
-RUN apt-get -y update && \
-    apt-get -y dist-upgrade && \
-    apt-get -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl ca-certificates php-cgi php-gd php-mbstring php-zip php-json php-xml curl && \
-    apt-get -y autoremove && apt-get -y clean && rm -rf /var/lib/apt/lists/*
-# apt-get -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl ca-certificates php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl 
+RUN apt-get -y update && apt-get -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl ca-certificates php-cgi php-gd php-mbstring php-zip php-json php-xml && \
+  apt-get -y autoremove && apt-get -y clean && rm -rf /var/lib/apt/lists/*
+# apt-get -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl ca-certificates php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl
 
 # set up lighttpd modules
 COPY 95-bludit.conf /etc/lighttpd/conf-available/
 
 RUN echo 'url.rewrite-if-not-file = ( "" => "/index.php?${qsa}" )' >> /etc/lighttpd/conf-available/10-rewrite.conf && \
-    sed -i -e 's|/var/log/lighttpd/access.log|/tmp/logpipe|g' /etc/lighttpd/conf-available/10-accesslog.conf && \
-    lighttpd-enable-mod accesslog deflate rewrite fastcgi-php bludit && \
-    install -o www-data -g www-data -m 750 -d /run/lighttpd && \
-    rm /var/www/html/index.lighttpd.html && \
-    mkdir -p /var/www/html/bl-content/
+  sed -i -e 's|/var/log/lighttpd/access.log|/tmp/logpipe|g' /etc/lighttpd/conf-available/10-accesslog.conf && \
+  lighttpd-enable-mod accesslog deflate rewrite fastcgi-php bludit && \
+  install -o www-data -g www-data -m 750 -d /run/lighttpd && \
+  rm /var/www/html/index.lighttpd.html && \
+  mkdir -p /var/www/html/bl-content/
 
 # set up php.ini
 RUN sed -i -e \
-    's|;cgi.fix_pathinfo=1|cgi.fix_pathinfo=1|g; \
-     s|upload_max_filesize = 2M|upload_max_filesize = 100M|g; \
-     s|post_max_size = 8M|post_max_size = 100M|g; \
-     s|variables_order = "GPCS"|variables_order = "EGPCS"|g; \
-     s|memory_limit = 128M|memory_limit = -1|g' /etc/php/${PHP_VERSION}/cgi/php.ini
-
-# bludit installation
-WORKDIR /var/www/html
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN BLUDIT_VERSION="$(curl -s https://api.github.com/repos/bludit/bludit/releases/latest | grep tag_name - | cut -d'"' -f4)" && \
-    curl "https://codeload.github.com/bludit/bludit/tar.gz/refs/tags/${BLUDIT_VERSION}" | tar xz -C . --strip-components 1 \
-    --exclude='*/.gitignore' \
-    --exclude='*/.github' \
-    --exclude='*/README.md' \
-    --exclude='*/LICENSE' && \
-    mkdir -p /var/www/html/bl-content && \
-    chown -R www-data:www-data /var/www/html
-#    sed -i -e "s|'DEBUG_MODE', FALSE|'DEBUG_MODE', TRUE|g" /var/www/html/bl-kernel/boot/init.php
+  's|;cgi.fix_pathinfo=1|cgi.fix_pathinfo=1|g; \
+  s|upload_max_filesize = 2M|upload_max_filesize = 100M|g; \
+  s|post_max_size = 8M|post_max_size = 100M|g; \
+  s|variables_order = "GPCS"|variables_order = "EGPCS"|g; \
+  s|memory_limit = 128M|memory_limit = -1|g' /etc/php/${PHP_VERSION}/cgi/php.ini
 
 # set volume
 VOLUME /var/www/html/bl-content
