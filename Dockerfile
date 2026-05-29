@@ -23,8 +23,7 @@ WORKDIR /var/www/html
 COPY --from=builder /work /var/www/html
 
 # package installtion
-RUN apt-get -y update && apt-get -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl \
-  ca-certificates php-cgi php-gd php-mbstring php-zip php-json php-xml && \
+RUN apt-get -y update && apt-get -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl ca-certificates php-cgi php-gd php-mbstring php-zip php-json php-xml && \
   apt-get -y autoremove && apt-get -y clean && rm -rf /var/lib/apt/lists/*
 # apt-get -y --no-install-recommends install lighttpd spawn-fcgi lighttpd-mod-deflate lighttpd-mod-openssl ca-certificates php-cgi php-fdomdocument php-gd php-mbstring php-zip php-json php-xml curl
 
@@ -36,7 +35,7 @@ RUN echo 'url.rewrite-if-not-file = ( "" => "/index.php?${qsa}" )' >> /etc/light
   lighttpd-enable-mod accesslog deflate rewrite fastcgi-php bludit && \
   install -o www-data -g www-data -m 750 -d /run/lighttpd && \
   rm /var/www/html/index.lighttpd.html && mkdir -p /var/www/html/bl-content/ && \
-  mkdir -p /usr/share/nginx/ && ln -s /var/www/html/ /usr/share/nginx/html/
+  mkdir -p /usr/share/nginx/ && ln -s /var/www/html/ /usr/share/nginx/html
 
 # set up php.ini
 RUN sed -i -e \
